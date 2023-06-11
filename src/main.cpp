@@ -8,12 +8,21 @@ LiquidCrystal_I2C lcd(0x27, 16, 4);
 void fnvShowChannelInfo(int channel);
 void fnvShowAllChannel(void);
 void fnvReadPowerValues(int channel);
+void fnvPrintChannelInfo(int channel);
 
 int timerReset = 0;
 float current[3];
 float current_compensated[3];
 float voltage[3];
 float power[3];
+
+unsigned long timerToShow = 0;
+unsigned long timerToPrint = 0;
+int channelCounterToShow = 1;
+int channelCounterToPrint = 1;
+
+#define TIME_TO_SHOW_LCD 2000
+#define TIME_TO_PRINT    1000
 
 void setup()
 {
@@ -44,16 +53,35 @@ void loop()
    // fnvShowAllChannel();
 
    /*Exibe dados do canal escolhido*/
-   // fnvShowChannelInfo(1);
+   fnvShowChannelInfo(1);
+   fnvPrintChannelInfo(1);
+   delay(1000);
+   
+   // if((millis() - timerToShow) > TIME_TO_SHOW_LCD)
+   // {
+   //    timerToShow = millis();
 
-   // delay(1000);
+   //    lcd.clear();
+   //    fnvShowChannelInfo(channelCounterToShow);
 
-   for(int i = 1; i < 4; i++)
-   {
-      lcd.clear();
-      fnvShowChannelInfo(i);
-      delay(2000);
-   }
+   //    channelCounterToShow++;
+   //    if(channelCounterToShow > 3)
+   //    {
+   //       channelCounterToShow = 1;
+   //    }
+   // }
+
+   // if((millis() - timerToPrint) > TIME_TO_PRINT)
+   // {
+   //    timerToPrint = millis();
+   //    fnvPrintChannelInfo(channelCounterToPrint);
+
+   //    channelCounterToPrint++;
+   //    if(channelCounterToPrint > 3)
+   //    {
+   //       channelCounterToPrint = 1;
+   //    }
+   // }
 }
 
 /*
@@ -66,7 +94,7 @@ void fnvShowChannelInfo(int channel)
 {
    int correctChannel = channel - 1;
 
-   fnvReadPowerValues(correctChannel);
+   fnvReadPowerValues(channel);
 
    lcd.setCursor(0, 0);
    lcd.print("Channel ");
@@ -74,10 +102,14 @@ void fnvShowChannelInfo(int channel)
    lcd.print(":");
    lcd.setCursor(0, 1);
    lcd.print("V: ");
-
    if (voltage[correctChannel] < 1)
    {
-      lcd.print(voltage[correctChannel] * 1000, 0);
+      voltage[correctChannel] = voltage[correctChannel] * 1000;
+      if(voltage[correctChannel] < 10)
+      {
+         voltage[correctChannel] = 0;
+      }
+      lcd.print(voltage[correctChannel], 0);
       lcd.print(" mV     ");
    }
    else
@@ -144,4 +176,44 @@ void fnvReadPowerValues(int channel)
    current_compensated[correctChannel] = ina3221.getCurrentCompensated((ina3221_ch_t) correctChannel)  * 1.044 ;
    voltage[correctChannel] = ina3221.getVoltage((ina3221_ch_t) correctChannel) * 0.9593;
    power[correctChannel] = current_compensated[correctChannel] * voltage[correctChannel];
+}
+
+void fnvPrintChannelInfo(int channel)
+{
+   int correctChannel = channel - 1;
+
+   fnvReadPowerValues(channel);
+
+   Serial.print("Ch" + String(channel) + "");
+   if (voltage[correctChannel] < 1)
+   {
+      voltage[correctChannel] = voltage[correctChannel] * 1000;
+      if(voltage[correctChannel] < 10)
+      {
+         voltage[correctChannel] = 0;
+      }
+      Serial.print(String(voltage[correctChannel], 0) + " mV");
+   }
+   else
+   {
+      Serial.print(String(voltage[correctChannel], 0) + " V");
+   }
+
+   if (current_compensated[correctChannel] < 1)
+   {
+      Serial.print(String(current_compensated[correctChannel] * 1000, 0) + " mA");
+   }
+   else
+   {
+      Serial.print(String(current_compensated[correctChannel], 0) + " A");
+   }
+
+   if (power[0] < 1)
+   {
+      Serial.println(String(power[correctChannel] * 1000, 0) + " mW");
+   }
+   else
+   {
+      Serial.print(String(power[correctChannel], 0) + " W");
+   }
 }
