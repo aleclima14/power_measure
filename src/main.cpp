@@ -22,7 +22,7 @@ int channelCounterToShow = 1;
 int channelCounterToPrint = 1;
 
 #define TIME_TO_SHOW_LCD 2000
-#define TIME_TO_PRINT    1000
+#define TIME_TO_PRINT    333
 
 void setup()
 {
@@ -53,35 +53,36 @@ void loop()
    // fnvShowAllChannel();
 
    /*Exibe dados do canal escolhido*/
-   fnvShowChannelInfo(1);
-   fnvPrintChannelInfo(1);
-   delay(1000);
-   
-   // if((millis() - timerToShow) > TIME_TO_SHOW_LCD)
-   // {
-   //    timerToShow = millis();
+   // fnvShowChannelInfo(1);
+   // fnvPrintChannelInfo(1);
+   // delay(1000);
 
-   //    lcd.clear();
-   //    fnvShowChannelInfo(channelCounterToShow);
+   if((millis() - timerToShow) > TIME_TO_SHOW_LCD)
+   {
+      timerToShow = millis();
 
-   //    channelCounterToShow++;
-   //    if(channelCounterToShow > 3)
-   //    {
-   //       channelCounterToShow = 1;
-   //    }
-   // }
+      // lcd.clear();
+      fnvShowChannelInfo(1);
+      // fnvShowChannelInfo(channelCounterToShow);
 
-   // if((millis() - timerToPrint) > TIME_TO_PRINT)
-   // {
-   //    timerToPrint = millis();
-   //    fnvPrintChannelInfo(channelCounterToPrint);
+      // channelCounterToShow++;
+      // if(channelCounterToShow > 3)
+      // {
+      //    channelCounterToShow = 1;
+      // }
+   }
 
-   //    channelCounterToPrint++;
-   //    if(channelCounterToPrint > 3)
-   //    {
-   //       channelCounterToPrint = 1;
-   //    }
-   // }
+   if((millis() - timerToPrint) > TIME_TO_PRINT)
+   {
+      timerToPrint = millis();
+      fnvPrintChannelInfo(channelCounterToPrint);
+
+      channelCounterToPrint++;
+      if(channelCounterToPrint > 3)
+      {
+         channelCounterToPrint = 1;
+      }
+   }
 }
 
 /*
@@ -184,36 +185,36 @@ void fnvPrintChannelInfo(int channel)
 
    fnvReadPowerValues(channel);
 
-   Serial.print("Ch" + String(channel) + "");
-   if (voltage[correctChannel] < 1)
-   {
+   Serial.print("Ch" + String(channel) + " ");
+   // if (voltage[correctChannel] < 1)
+   // {
       voltage[correctChannel] = voltage[correctChannel] * 1000;
       if(voltage[correctChannel] < 10)
       {
          voltage[correctChannel] = 0;
       }
-      Serial.print(String(voltage[correctChannel], 0) + " mV");
-   }
-   else
-   {
-      Serial.print(String(voltage[correctChannel], 0) + " V");
-   }
+      Serial.print(String(voltage[correctChannel], 0) + " mV ");
+   // }
+   // else
+   // {
+   //    Serial.print(String(voltage[correctChannel], 2) + " V ");
+   // }
 
-   if (current_compensated[correctChannel] < 1)
-   {
-      Serial.print(String(current_compensated[correctChannel] * 1000, 0) + " mA");
-   }
-   else
-   {
-      Serial.print(String(current_compensated[correctChannel], 0) + " A");
-   }
+   // if (current_compensated[correctChannel] < 1)
+   // {
+      Serial.print(String(current_compensated[correctChannel] * 1000, 0) + " mA ");
+   // }
+   // else
+   // {
+      // Serial.print(String(current_compensated[correctChannel], 2) + " A ");
+   // }
 
-   if (power[0] < 1)
-   {
-      Serial.println(String(power[correctChannel] * 1000, 0) + " mW");
-   }
-   else
-   {
-      Serial.print(String(power[correctChannel], 0) + " W");
-   }
+   // if (power[0] < 1)
+   // {
+      Serial.println(String(power[correctChannel] * 1000, 0) + " mW ");
+   // }
+   // else
+   // {
+      // Serial.println(String(power[correctChannel], 2) + " W ");
+   // }
 }
